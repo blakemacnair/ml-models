@@ -1,0 +1,14 @@
+name: ml-models
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.7
+  - jupyter
+  - matplotlib
+  - numpy
+  - pandas
+  - pillow
+  - pytorch
+  - scikit-learn
+  - tqdm
