@@ -1,0 +1,13 @@
+{
+  "id": "bmacnair/mushroom-classification-id3",
+  "title": "Mushroom Classification with ID3 Decision Trees",
+  "code_file": "INSERT_CODE_FILE_PATH_HERE",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "false",
+  "enable_gpu": "false",
+  "enable_internet": "false",
+  "dataset_sources": ["uciml/mushroom-classification"],
+  "competition_sources": [],
+  "kernel_sources": []
+}
