@@ -2,6 +2,7 @@ import sklearn.datasets as skdata
 from typing import Dict, Any, Optional
 import pandas as pd
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
 
 
 def entropy(s: pd.DataFrame, a: str):
@@ -24,16 +25,58 @@ def information_gain(s: pd.DataFrame, a: str, target_attribute: str):
     return e_total - e_given_a
 
 
+def split_information(s: pd.DataFrame, a: str):
+    s_a = s[a]
+    uniques = [c for c in s_a.unique() if c is not np.nan]
+    size_a = s_a.size
+    return -sum([(s_a[s_a == c].size / size_a) * np.log2(s_a[s_a == c].size / size_a) for c in uniques
+                 if s_a[s_a == c].size != 0])
+
+
+def gain_ratio(s: pd.DataFrame, a: str, target_attribute: str):
+    return information_gain(s, a, target_attribute) / split_information(s, a)
+
+
 def find_best_attribute_to_split(s: pd.DataFrame, attributes: pd.Index, target_attribute: str):
     gains = []
     for a in attributes:
-        gains.append(information_gain(s, a, target_attribute))
+        if is_attribute_numeric(s, a):
+            gains.append(numeric_information_gain(s, a, target_attribute))
+        else:
+            gains.append(gain_ratio(s, a, target_attribute))
 
     return attributes[gains.index(max(gains))], max(gains)
 
 
-def numerical_information_gain(s: pd.DataFrame, num_attribute: str, target_attribute: str):
-    return
+def numeric_information_gain(s: pd.DataFrame, num_attribute: str, target_attribute: str):
+    k = KNeighborsClassifier()
+    x = s[num_attribute].to_numpy().reshape(-1, 1)
+    y = s[target_attribute].to_numpy()
+    # TODO: Need to be able to factorize the target attribute column for these tasks
+    k.fit(x, y)
+    p = k.predict(x)
+    p_series = pd.Series(p, index=s.index)
+    cp = pd.DataFrame(data=s[target_attribute].copy())
+    cp[num_attribute] = p_series
+    ig = information_gain(cp, num_attribute, target_attribute)
+    return ig, k
+
+
+def is_attribute_numeric(s: pd.DataFrame, a: str, min_classes=10):
+    if np.issubdtype(s[a].dtype, np.number) and s[a].unique().size > min_classes:
+        return True
+    else:
+        return False
+
+
+def clean_na_values(s: pd.DataFrame):
+    means = s.mean()
+    for c in s.columns:
+        if c in means.keys():
+            s[c].loc[s[c].isna()] = means[c]
+        else:
+            m = s[c].value_counts().index[0]
+            s[c].loc[s[c].isna()] = m
 
 
 class ID3Node:
