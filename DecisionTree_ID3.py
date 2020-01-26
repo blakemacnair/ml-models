@@ -32,13 +32,14 @@ def find_best_attribute_to_split(s: pd.DataFrame, attributes: pd.Index, target_a
     return attributes[gains.index(max(gains))], max(gains)
 
 
-class Node:
-    def __init__(self, s: pd.DataFrame, attributes: pd.Index, target_attribute: str, min_gain=0.4):
+class ID3Node:
+    def __init__(self, s: pd.DataFrame, attributes: pd.Index, target_attribute: str,
+                 depth: int = 1, max_depth: int = np.inf, min_gain=0.4):
         self.prediction: Optional[Any] = None
-        self.children: Optional[Dict[Any, Node]] = None
+        self.children: Optional[Dict[Any, ID3Node]] = None
         self.split_attribute: Optional[str] = None
 
-        if len(attributes) <= 1:
+        if len(attributes) <= 1 or depth >= max_depth:
             targets = s[target_attribute]
             self.prediction = targets.value_counts().index[0]
         else:
@@ -51,15 +52,23 @@ class Node:
             unique_values = s[self.split_attribute].unique()
 
             next_attributes = attributes.drop([self.split_attribute])
-            self.children = {value: Node(s[s[self.split_attribute] == value],
-                                         next_attributes,
-                                         target_attribute)
+            self.children = {value: ID3Node(s[s[self.split_attribute] == value],
+                                            next_attributes,
+                                            target_attribute,
+                                            depth=depth + 1,
+                                            max_depth=max_depth,
+                                            min_gain=min_gain)
                              for value in unique_values}
 
     def size(self):
         if self.children is None:
             return 1
         return 1 + sum([c.size() for c in self.children.values()])
+
+    def depth(self):
+        if self.children is None:
+            return 1
+        return 1 + max([c.depth() for c in self.children.values()])
 
     def predict(self, samples: pd.DataFrame):
         if self.prediction is not None:
