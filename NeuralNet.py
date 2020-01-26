@@ -25,6 +25,9 @@ class ANN:
         assert (1 >= momentum >= 0)
         self.momentum = momentum
 
+        self.prev_dw_h = None
+        self.prev_dw_k = None
+
     def forward(self, x):
         o_h = sigmoid(self.w_h @ x)
         o = sigmoid(self.w_k @ o_h)
@@ -52,11 +55,23 @@ class ANN:
         dx_kh = np.repeat(x_kh, self.output_dims, axis=-1).transpose()
         dx = np.repeat(x, self.hidden_dims, axis=-1).transpose()
 
-        dw_h = d_h * dx
-        dw_k = d_k * dx_kh
+        dw_h = self.lr * d_h * dx
+        dw_k = self.lr * d_k * dx_kh
 
-        self.w_h += self.lr * dw_h
-        self.w_k += self.lr * dw_k
+        self.w_h += dw_h
+        self.w_k += dw_k
+
+        if self.decay > 0:
+            if self.prev_dw_h is not None:
+                m_h = self.decay * self.prev_dw_h
+                self.w_h += m_h
+
+            if self.prev_dw_h is not None:
+                m_k = self.decay * self.prev_dw_k
+                self.w_k += m_k
+
+            self.prev_dw_h = dw_h
+            self.prev_dw_k = dw_k
 
 
 if __name__ == "__main__":
