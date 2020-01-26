@@ -73,12 +73,32 @@ class ANN:
             self.prev_dw_h = dw_h
             self.prev_dw_k = dw_k
 
+        err = np.sum(np.square(self.forward(x).flatten() - y.flatten()))
+        delta = (np.mean(dw_h) + np.mean(dw_k)) / 2
+        
+
+        return err, delta
+
+    def train(self, x, y, max_iter=200, min_delta_error=1e-5):
+        delta_error = np.inf
+        last_err = np.inf
+
+        i = 0
+
+        while delta_error > min_delta_error and i < max_iter:
+            err, delta = self.backpropagation(x, y)
+            delta_error = np.abs(last_err - err)
+            last_err = err
+            i += 1
+            print(delta_error)
+
 
 if __name__ == "__main__":
-    d_in = 4
-    d_out = 2
-    d_h = 10
+    d_in = 7
+    d_out = 4
+    d_h = 25
     net = ANN(d_in, d_out, d_h)
     x = np.random.random(d_in)
-    y = np.random.randint(0, 2, size=2)
-    net.backpropagation(x, y)
+    y = np.random.randint(0, 2, size=d_out)
+
+    net.train(x, y)
