@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import OneHotEncoder
-from DecisionTree_ID3 import ID3Node, clean_na_values
+from DecisionTree_ID3 import clean_na_values
 import re
 
 from sklearn.neighbors import KNeighborsClassifier
@@ -143,13 +143,13 @@ if __name__ == "__main__":
         X_train, X_test = X[train_ind], X[test_ind]
         y_train, y_test = y[train_ind], y[test_ind]
 
-        d = DecisionTreeClassifier()
+        d = DecisionTreeClassifier(min_impurity_decrease=5e-3)
         d.fit(X_train, y_train)
         print(d.get_depth())
 
         train_score = d.score(X_train, y_train)
         test_score = d.score(X_test, y_test)
-        print("Train acc: {}\nTest acc: {}\n".format(train_score, test_score))
+        print("Train acc: {}\nTest acc: {}\n--------".format(train_score, test_score))
 
         if test_score > best_acc:
             best_acc = test_score
