@@ -75,7 +75,7 @@ class ANN:
 
         err = np.sum(np.square(self.forward(x).flatten() - y.flatten()))
         delta = (np.mean(dw_h) + np.mean(dw_k)) / 2
-        
+
 
         return err, delta
 
