@@ -32,6 +32,10 @@ def find_best_attribute_to_split(s: pd.DataFrame, attributes: pd.Index, target_a
     return attributes[gains.index(max(gains))], max(gains)
 
 
+def numerical_information_gain(s: pd.DataFrame, num_attribute: str, target_attribute: str):
+    return
+
+
 class ID3Node:
     def __init__(self, s: pd.DataFrame, attributes: pd.Index, target_attribute: str,
                  depth: int = 1, max_depth: int = np.inf, min_gain=0.4):
