@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
+from sklearn import tree
+import matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import OneHotEncoder
 from DecisionTree_ID3 import clean_na_values
@@ -134,7 +136,7 @@ if __name__ == "__main__":
     X = s.drop(columns=["PassengerId", "Survived"]).to_numpy()
     y = s["Survived"].to_numpy()
 
-    cv = ShuffleSplit(n_splits=20, test_size=0.5, random_state=0)
+    cv = ShuffleSplit(n_splits=10, test_size=0.5, random_state=0)
 
     best = None
     best_acc = 0
@@ -143,7 +145,7 @@ if __name__ == "__main__":
         X_train, X_test = X[train_ind], X[test_ind]
         y_train, y_test = y[train_ind], y[test_ind]
 
-        d = DecisionTreeClassifier(min_impurity_decrease=5e-3)
+        d = DecisionTreeClassifier(min_impurity_decrease=2e-3)
         d.fit(X_train, y_train)
         print(d.get_depth())
 
@@ -157,11 +159,16 @@ if __name__ == "__main__":
 
     s_test, _, _, _, _, _ = clean_titanic(test, k_age, k_fare, mc_names, mc_tickets, enc)
     X_test = s_test.drop(columns=["PassengerId"]).to_numpy()
-    y = best.predict(X_test)
+    y_test = best.predict(X_test)
+
+    # TODO: Analyze these plots, and try to print them in more resolution!
+    plt.figure()
+    tree.plot_tree(best, filled=True)
+    plt.show()
 
     df_pred = pd.DataFrame({
         'PassengerId': test['PassengerId'],
-        'Survived'   : y.astype(int)
+        'Survived'   : y_test.astype(int)
     })
 
     df_pred.to_csv("pred.csv", index=False)

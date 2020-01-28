@@ -12,3 +12,5 @@ dependencies:
   - pytorch
   - scikit-learn
   - tqdm
+  - pip:
+      - graphviz
