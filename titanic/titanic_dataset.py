@@ -11,6 +11,19 @@ def import_titanic_train_test() -> (pd.DataFrame, pd.DataFrame):
     return pd.read_csv("train.csv"), pd.read_csv("test.csv")
 
 
+def import_cleaned_titanic_data():
+    train, test = import_titanic_train_test()
+    s, k_age, k_fare, mc_names, mc_tickets, enc = clean_titanic(train)
+    x = s.drop(columns=["PassengerId", "Survived"]).to_numpy()
+    y = s["Survived"].to_numpy()
+
+    s_test, _, _, _, _, _ = clean_titanic(test, k_age, k_fare, mc_names, mc_tickets, enc)
+    x_test = s_test.drop(columns=["PassengerId"]).to_numpy()
+    passenger_ids = s_test["PassengerId"].to_numpy()
+
+    return x, y, x_test, passenger_ids
+
+
 def clean_titanic(s: pd.DataFrame, k_age=None, k_fare=None, mc_names=None, mc_tickets=None, enc=None):
     s = s.copy()
     clean_cabin_numbers(s)

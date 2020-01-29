@@ -95,17 +95,18 @@ class ANN:
 
 
 class MurderBot(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim, hidden_dims, output_dim):
         super(MurderBot, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
-        hidden_dim = int(input_dim / 2)
 
-        self.model = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, output_dim)
-        )
+        self.model = nn.Sequential()
+        last_dim = input_dim
+        for i, hidden_dim in enumerate(hidden_dims):
+            self.model.add_module("Hidden {}".format(i), nn.Linear(last_dim, hidden_dim))
+            self.model.add_module("ReLU {}".format(i), nn.ReLU())
+            last_dim = hidden_dim
+        self.model.add_module("Output", nn.Linear(last_dim, output_dim))
 
     def forward(self, x):
         return self.model(x)

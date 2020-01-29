@@ -35,7 +35,7 @@ if __name__ == "__main__":
     cv = ShuffleSplit(n_splits=3, test_size=0.3, random_state=0)
     epoch = 0
     for train_index, test_index in cv.split(X, y):
-        mbot = MurderBot(input_dim=X.shape[1], output_dim=y.shape[1])
+        mbot = MurderBot(input_dim=X.shape[1], hidden_dims=[int(X.shape[1] / 2)], output_dim=y.shape[1])
         optimizer = SGD(mbot.parameters(), lr=0.1)
         criterion = nn.MSELoss()
 
