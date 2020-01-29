@@ -1,8 +1,5 @@
-import torch
 from torch import Tensor, nn
 from torch.optim import SGD
-from torch.optim.optimizer import Optimizer
-from torch.nn import functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import pandas as pd
 import numpy as np
@@ -11,46 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 import matplotlib.pyplot as plt
 
-
-class MurderBot(nn.Module):
-    def __init__(self, input_dim, output_dim):
-        super(MurderBot, self).__init__()
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-        hidden_dim = int(input_dim / 2)
-
-        self.model = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, output_dim)
-        )
-
-    def forward(self, x):
-        return self.model(x)
-
-    def predict(self, x):
-        return self.model(x).round()
-
-    def fit(self, data_loader: DataLoader, loss_func, optimizer):
-        loss_history = []
-        acc_history = []
-        for x_batch, y_batch in data_loader:
-
-            self.train()
-
-            pred = self(x_batch)
-            loss = loss_func(pred, y_batch)
-
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
-
-            self.eval()
-
-            accuracy = float((self.predict(x_batch) == y_batch).sum()) / (pred.shape[0] * pred.shape[1])
-            loss_history.append(loss)
-            acc_history.append(accuracy)
-        return loss_history, acc_history
+from NeuralNet import MurderBot
 
 
 def mushrooms_to_numeric(s: pd.DataFrame):

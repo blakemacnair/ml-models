@@ -1,5 +1,6 @@
+from torch import nn
+from torch.utils.data import DataLoader
 import numpy as np
-import pandas as pd
 
 
 def sigmoid(x: np.ndarray) -> np.ndarray:
@@ -91,6 +92,47 @@ class ANN:
             last_err = err
             i += 1
             print(delta_error)
+
+
+class MurderBot(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(MurderBot, self).__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        hidden_dim = int(input_dim / 2)
+
+        self.model = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, output_dim)
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+    def predict(self, x):
+        return self.model(x).round()
+
+    def fit(self, data_loader: DataLoader, loss_func, optimizer):
+        loss_history = []
+        acc_history = []
+        for x_batch, y_batch in data_loader:
+
+            self.train()
+
+            pred = self(x_batch)
+            loss = loss_func(pred, y_batch)
+
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+
+            self.eval()
+
+            accuracy = float((self.predict(x_batch) == y_batch).sum()) / (pred.shape[0] * pred.shape[1])
+            loss_history.append(loss)
+            acc_history.append(accuracy)
+        return loss_history, acc_history
 
 
 if __name__ == "__main__":
