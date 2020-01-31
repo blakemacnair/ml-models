@@ -7,12 +7,12 @@ import re
 from sklearn.neighbors import KNeighborsClassifier
 
 
-def import_titanic_train_test() -> (pd.DataFrame, pd.DataFrame):
-    return pd.read_csv("train.csv"), pd.read_csv("test.csv")
+def import_titanic_train_test(directorypath="./") -> (pd.DataFrame, pd.DataFrame):
+    return pd.read_csv(directorypath+"train.csv"), pd.read_csv(directorypath+"test.csv")
 
 
-def import_cleaned_titanic_data():
-    train, test = import_titanic_train_test()
+def import_cleaned_titanic_data(directorypath="./"):
+    train, test = import_titanic_train_test(directorypath)
     s, k_age, k_fare, mc_names, mc_tickets, enc = clean_titanic(train)
     x = s.drop(columns=["PassengerId", "Survived"]).to_numpy()
     y = s["Survived"].to_numpy()

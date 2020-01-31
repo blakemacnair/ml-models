@@ -5,22 +5,11 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from sklearn.preprocessing import OneHotEncoder
+from mushrooms.mushroom_dataset import mushrooms_to_numeric, import_mushrooms
 
 import matplotlib.pyplot as plt
 
 from NeuralNet import MurderBot
-
-
-def mushrooms_to_numeric(s: pd.DataFrame):
-    enc = OneHotEncoder(drop='first')
-    enc = enc.fit(s)
-
-    s_enc = enc.transform(s).toarray()
-    return s_enc, enc
-
-
-def import_mushrooms() -> pd.DataFrame:
-    return pd.read_csv("mushrooms.csv")
 
 
 if __name__ == "__main__":
