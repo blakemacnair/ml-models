@@ -1,61 +1,46 @@
-from torch import Tensor, nn
-from torch.optim import SGD
+from torch import Tensor
 from torch.utils.data import TensorDataset, DataLoader
-import pandas as pd
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
-from sklearn.preprocessing import OneHotEncoder
-
-import matplotlib.pyplot as plt
 
 from NeuralNet import MurderBot
 from titanic.titanic_dataset import import_cleaned_titanic_data
 
+from metrics import plot_compare_precision_recall_curve, plot_compare_roc_curve, plot_compare_learning_curve
+
 
 if __name__ == "__main__":
-    X, y, X_test, test_ids = import_cleaned_titanic_data()
+    x, y, x_test, test_ids = import_cleaned_titanic_data()
 
-    X = Tensor(X)
+    x = Tensor(x)
+
+    x_test = Tensor(x_test)
+
     y = y.reshape(-1, 1)
     y = Tensor(np.concatenate((y, 1 - y), axis=1))
 
-    X_test = Tensor(X_test)
+    mbot = MurderBot(input_dim=x.shape[1],
+                     hidden_dims=[int(x.shape[1] * 1.25), int(x.shape[1] / 2)],
+                     output_dim=y.shape[1])
+
+    classifiers = {'MurderBot': mbot}
+    plot_compare_roc_curve(classifiers, x, y)
 
     cv = ShuffleSplit(n_splits=3, test_size=0.3, random_state=0)
-    epoch = 0
-    for train_index, test_index in cv.split(X, y):
-        mbot = MurderBot(input_dim=X.shape[1],
-                         hidden_dims=[int(X.shape[1] * 1.25), int(X.shape[1] / 2)],
-                         output_dim=y.shape[1])
-        optimizer = SGD(mbot.parameters(), lr=0.1)
-        criterion = nn.MSELoss()
-
-        train_x = X[train_index]
-        train_y = y[train_index]
-
-        test_x = X[test_index]
-        test_y = y[test_index]
-
-        train_dataset = TensorDataset(train_x, train_y)
-        train_loader = DataLoader(dataset=train_dataset, batch_size=10)
-
-        loss = []
-        acc = []
-        for epoch in range(3):
-            loss_epoch, acc_epoch = mbot.fit(train_loader, criterion, optimizer)
-            loss += loss_epoch
-            acc += acc_epoch
-
-        fig, (ax1, ax2) = plt.subplots(1, 2)
-        ax1.set_title("Loss")
-        ax1.plot(loss)
-        ax2.set_title("Accuracy")
-        ax2.plot(acc)
-        plt.show()
-
-        test_p = mbot.predict(test_x)
-        score = float((test_p == test_y).sum()) / (test_p.shape[0] * test_p.shape[1])
-        print("Score: {}".format(score))
-
-        epoch += 1
+    # for train_index, test_index in cv.split(X, y):
+    #     train_x = X[train_index]
+    #     train_y = y[train_index]
+    #
+    #     test_x = X[test_index]
+    #     test_y = y[test_index]
+    #
+    #     train_dataset = TensorDataset(train_x, train_y)
+    #     train_loader = DataLoader(dataset=train_dataset, batch_size=10)
+    #
+    #     for epoch in range(3):
+    #         mbot.fit(train_x, train_y)
+    #
+    #     test_p = mbot.predict(test_x)
+    #     score = float((test_p == test_y).sum()) / (test_p.shape[0] * test_p.shape[1])
+    #     print("Score: {}".format(score))
     print("Done boiiiii")

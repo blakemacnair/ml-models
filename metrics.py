@@ -103,7 +103,8 @@ def plot_learning_curves(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSpl
         plt.show()
 
 
-def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray, cv: ShuffleSplit,
+def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
+                                cv=ShuffleSplit(n_splits=5),
                                 train_sizes=np.linspace(0.1, 1.0, 9)):
     fig = plt.figure()
     ax = fig.add_subplot()
