@@ -7,6 +7,7 @@ from typing import Dict, List, Any
 from sklearn.base import ClassifierMixin
 from sklearn.model_selection import ShuffleSplit
 import numpy as np
+from scipy.interpolate import make_interp_spline
 
 
 def compare_models(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
@@ -64,7 +65,12 @@ def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: n
                                                                 train_sizes=train_sizes,
                                                                 random_state=0)
         test_scores_mean = np.mean(test_scores, axis=1)
-        ax.plot(train_sizes, test_scores_mean, 'o-', label=name)
+
+        spl = make_interp_spline(train_sizes, test_scores_mean, k=3)
+
+        x_new = np.linspace(train_sizes.min(), train_sizes.max(), 200)
+        y_new = spl(x_new).T
+        ax.plot(x_new, y_new, label=name)
 
     ax.legend()
     plt.show()

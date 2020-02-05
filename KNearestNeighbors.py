@@ -27,14 +27,14 @@ if __name__ == "__main__":
 
     plot_compare_precision_recall_curve(classifiers=classifiers, x=x, y=y)
     plot_compare_roc_curve(classifiers=classifiers, x=x, y=y)
-    # plot_compare_learning_curve(classifiers=classifiers, x=x, y=y, cv=cv,
-    #                             train_sizes=np.linspace(0.1, 1.0, 4))
+    plot_compare_learning_curve(classifiers=classifiers, x=x, y=y, cv=cv,
+                                train_sizes=np.linspace(0.1, 0.5, 4))
 
     x, y, x_test, test_ids = import_cleaned_titanic_data(directorypath="titanic/")
 
     plot_compare_precision_recall_curve(classifiers=classifiers, x=x, y=y)
     plot_compare_roc_curve(classifiers=classifiers, x=x, y=y)
     plot_compare_learning_curve(classifiers=classifiers, x=x, y=y, cv=cv,
-                                train_sizes=np.linspace(0.1, 1.0, 20))
+                                train_sizes=np.linspace(0.1, 1.0, 15))
 
     print("Booty - Done")
