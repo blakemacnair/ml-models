@@ -49,60 +49,6 @@ def compare_models(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
     return train_scores, test_scores
 
 
-def plot_learning_curves(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
-                         x: np.ndarray, y: np.ndarray):
-    for name, clf in classifiers.items():
-        plt.figure()
-
-        # Get learning data
-        train_sizes, train_scores, test_scores, fit_times, score_times = learning_curve(clf, x, y, cv=cv,
-                                                                                        return_times=True,
-                                                                                        random_state=0)
-        train_scores_mean = np.mean(train_scores, axis=1)
-        train_scores_std = np.std(train_scores, axis=1)
-        test_scores_mean = np.mean(test_scores, axis=1)
-        test_scores_std = np.std(test_scores, axis=1)
-        fit_times_mean = np.mean(fit_times, axis=1)
-        fit_times_std = np.std(fit_times, axis=1)
-
-        # Plot learning curve
-        ax_1 = plt.subplot(2, 2, 1)
-        ax_1.grid()
-        ax_1.fill_between(train_sizes, train_scores_mean - train_scores_std,
-                          train_scores_mean + train_scores_std, alpha=0.1,
-                          color="r")
-        ax_1.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                          test_scores_mean + test_scores_std, alpha=0.1,
-                          color="g")
-        ax_1.plot(train_sizes, train_scores_mean, 'o-', color="r",
-                  label="Training score")
-        ax_1.plot(train_sizes, test_scores_mean, 'o-', color="g",
-                  label="Cross-validation score")
-        ax_1.legend(loc="best")
-
-        # Plot n_samples vs fit_times
-        ax_2 = plt.subplot(2, 2, 2)
-        ax_2.grid()
-        ax_2.plot(train_sizes, fit_times_mean, 'o-')
-        ax_2.fill_between(train_sizes, fit_times_mean - fit_times_std,
-                          fit_times_mean + fit_times_std, alpha=0.1)
-        ax_2.set_xlabel("Training examples")
-        ax_2.set_ylabel("fit_times")
-        ax_2.set_title("Scalability of the model")
-
-        # Plot fit_time vs score
-        ax_3 = plt.subplot(2, 2, 3)
-        ax_3.grid()
-        ax_3.plot(fit_times_mean, test_scores_mean, 'o-')
-        ax_3.fill_between(fit_times_mean, test_scores_mean - test_scores_std,
-                          test_scores_mean + test_scores_std, alpha=0.1)
-        ax_3.set_xlabel("fit_times")
-        ax_3.set_ylabel("Score")
-        ax_3.set_title("Performance of the model")
-
-        plt.show()
-
-
 def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
                                 cv=ShuffleSplit(n_splits=5),
                                 train_sizes=np.linspace(0.1, 1.0, 9)):
