@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
-from DecisionTree_ID3 import clean_na_values
 import re
 
 from sklearn.neighbors import KNeighborsClassifier
@@ -136,3 +135,13 @@ def encode_non_numeric_columns(s: pd.DataFrame, enc=None):
     s.join(sa)
 
     return enc, cols
+
+
+def clean_na_values(s: pd.DataFrame):
+    means = s.mean()
+    for c in s.columns:
+        if c in means.keys():
+            s[c].loc[s[c].isna()] = means[c]
+        else:
+            m = s[c].value_counts().index[0]
+            s[c].loc[s[c].isna()] = m

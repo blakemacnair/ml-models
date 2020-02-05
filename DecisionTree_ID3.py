@@ -1,8 +1,14 @@
-import sklearn.datasets as skdata
 from typing import Dict, Any, Optional
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import ShuffleSplit
+from sklearn.tree import DecisionTreeClassifier
+
+from titanic.titanic_dataset import import_cleaned_titanic_data
+
+from metrics import plot_compare_precision_recall_curve, plot_compare_learning_curve, plot_compare_roc_curve
+
 
 
 def entropy(s: pd.DataFrame, a: str):
@@ -79,54 +85,34 @@ def clean_na_values(s: pd.DataFrame):
             s[c].loc[s[c].isna()] = m
 
 
-class ID3Node:
-    def __init__(self, s: pd.DataFrame, attributes: pd.Index, target_attribute: str,
-                 depth: int = 1, max_depth: int = np.inf, min_gain=0.4):
-        self.prediction: Optional[Any] = None
-        self.children: Optional[Dict[Any, ID3Node]] = None
-        self.split_attribute: Optional[str] = None
-
-        if len(attributes) <= 1 or depth >= max_depth:
-            targets = s[target_attribute]
-            self.prediction = targets.value_counts().index[0]
-        else:
-            self.split_attribute, gain = find_best_attribute_to_split(s, attributes, target_attribute)
-            if gain < min_gain:
-                targets = s[target_attribute]
-                self.prediction = targets.value_counts().index[0]
-                return
-
-            unique_values = s[self.split_attribute].unique()
-
-            next_attributes = attributes.drop([self.split_attribute])
-            self.children = {value: ID3Node(s[s[self.split_attribute] == value],
-                                            next_attributes,
-                                            target_attribute,
-                                            depth=depth + 1,
-                                            max_depth=max_depth,
-                                            min_gain=min_gain)
-                             for value in unique_values}
-
-    def size(self):
-        if self.children is None:
-            return 1
-        return 1 + sum([c.size() for c in self.children.values()])
-
-    def depth(self):
-        if self.children is None:
-            return 1
-        return 1 + max([c.depth() for c in self.children.values()])
-
-    def predict(self, samples: pd.DataFrame):
-        if self.prediction is not None:
-            return pd.Series(self.prediction, index=samples.index)
-        else:
-            predictions = pd.Series(None, index=samples.index)
-            for (key, child) in self.children.items():
-                subset = samples[samples[self.split_attribute] == key]
-                predictions = predictions.combine_first(child.predict(subset))
-            return predictions
-
-
 if __name__ == "__main__":
-    set = skdata.make_classification()
+    cv = ShuffleSplit(n_splits=10, test_size=0.5, random_state=0)
+
+    x, y, x_test, passenger_ids = import_cleaned_titanic_data(directorypath="titanic/")
+
+    # models = {
+    #     'impurity 2e-2': DecisionTreeClassifier(min_impurity_decrease=2e-2),
+    #     'impurity 2e-3': DecisionTreeClassifier(min_impurity_decrease=2e-3),  # The best performing impurity
+    #     'impurity 2e-5': DecisionTreeClassifier(min_impurity_decrease=2e-5),
+    #     'impurity 2e-7': DecisionTreeClassifier(min_impurity_decrease=2e-7)
+    # }
+
+    # models = {
+    #     'min samples 1': DecisionTreeClassifier(min_samples_leaf=1, min_impurity_decrease=2e-3),
+    #     'min samples 3': DecisionTreeClassifier(min_samples_leaf=3, min_impurity_decrease=2e-3),
+    #     'min samples 5': DecisionTreeClassifier(min_samples_leaf=5, min_impurity_decrease=2e-3),
+    #     'min samples 9': DecisionTreeClassifier(min_samples_leaf=9, min_impurity_decrease=2e-3),  # best min samples
+    # }
+
+    models = {
+        'GINI'   : DecisionTreeClassifier(criterion='gini', min_samples_leaf=9, min_impurity_decrease=2e-3),
+        'entropy': DecisionTreeClassifier(criterion='entropy', min_samples_leaf=9, min_impurity_decrease=2e-3)
+    }
+
+    cv = ShuffleSplit(n_splits=10, test_size=0.2)
+    train_sizes = np.linspace(0.3, 1.0, 100)
+
+    plot_compare_roc_curve(models, x, y)
+    plot_compare_precision_recall_curve(models, x, y)
+    plot_compare_learning_curve(models, x, y, cv=cv, train_sizes=train_sizes)
+
