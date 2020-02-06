@@ -6,6 +6,7 @@ from sklearn.model_selection import ShuffleSplit
 from sklearn.tree import DecisionTreeClassifier
 
 from titanic.titanic_dataset import import_cleaned_titanic_data
+from mushrooms.mushroom_dataset import import_mushrooms_numpy
 
 from metrics import plot_compare_precision_recall_curve, plot_compare_learning_curve, plot_compare_roc_curve
 
