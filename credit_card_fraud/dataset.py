@@ -6,7 +6,7 @@ from sklearn import preprocessing
 
 
 def load_credit_fraud_data(filepath='../data/creditcard.csv'):
-    return pd.read_csv('../data/creditcard.csv')
+    return pd.read_csv(filepath)
 
 
 def load_normalized_credit_fraud_data(filepath='../data/creditcard.csv'):
@@ -15,6 +15,14 @@ def load_normalized_credit_fraud_data(filepath='../data/creditcard.csv'):
 
 
 def load_credit_fraud_numpy(filepath='../data/creditcard.csv'):
+    data = load_credit_fraud_data(filepath)
+    xy = data.to_numpy()
+    x = xy[:, :-1]
+    y = xy[:, -1]
+    return x, y
+
+
+def load_normalized_credit_fraud_numpy(filepath='../data/creditcard.csv'):
     data = load_normalized_credit_fraud_data(filepath)
     xy = data.to_numpy()
     x = xy[:, :-1]

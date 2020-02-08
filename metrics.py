@@ -1,5 +1,7 @@
 from sklearn.metrics import plot_precision_recall_curve, plot_roc_curve, plot_confusion_matrix, precision_recall_curve
 from sklearn.metrics import average_precision_score
+from sklearn.metrics import get_scorer
+
 from sklearn.model_selection import learning_curve
 from sklearn.base import clone
 
@@ -53,7 +55,8 @@ def compare_models(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
 
 def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
                                 cv=ShuffleSplit(n_splits=5),
-                                train_sizes=np.linspace(0.1, 1.0, 9)):
+                                train_sizes=np.linspace(0.1, 1.0, 9),
+                                scoring='accuracy'):
     fig = plt.figure()
     ax = fig.add_subplot()
 
@@ -64,7 +67,8 @@ def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: n
     for name, clf in classifiers.items():
         train_sizes, train_scores, test_scores = learning_curve(clf, x, y, cv=cv,
                                                                 train_sizes=train_sizes,
-                                                                random_state=0)
+                                                                random_state=0,
+                                                                scoring=get_scorer(scoring))
         test_scores_mean = np.mean(test_scores, axis=1)
 
         spl = make_interp_spline(train_sizes, test_scores_mean, k=3)
