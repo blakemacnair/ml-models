@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.svm import SVC, LinearSVC, NuSVC
-from mushrooms.mushroom_dataset import import_mushrooms_numpy
 from titanic.titanic_dataset import import_cleaned_titanic_data
 from sklearn.model_selection import ShuffleSplit
 from sklearn import preprocessing
@@ -9,11 +8,6 @@ from metrics import plot_compare_learning_curve, plot_compare_roc_curve, plot_co
 
 if __name__ == "__main__":
     cv = ShuffleSplit(n_splits=5, test_size=0.6, random_state=0)
-
-    # clf = SVC(kernel='linear')
-    # models = {'linear': clf}
-    # x_m, y_m = import_mushrooms_numpy(filepath="mushrooms/mushrooms.csv")
-    # plot_compare_precision_recall_curve(models, x_m, y_m)
 
     models_kernels = {
         'linear' : SVC(kernel='linear'),

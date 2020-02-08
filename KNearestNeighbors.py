@@ -1,5 +1,4 @@
 from sklearn.neighbors import KNeighborsClassifier
-from mushrooms.mushroom_dataset import import_mushrooms_numpy
 from titanic.titanic_dataset import import_cleaned_titanic_data
 from sklearn.model_selection import ShuffleSplit
 import numpy as np
@@ -22,13 +21,6 @@ if __name__ == "__main__":
         'kd_tree': clf_kd_tree,
         'brute': clf_brute
     }
-
-    x, y = import_mushrooms_numpy(filepath="mushrooms/mushrooms.csv")
-
-    plot_compare_precision_recall_curve(classifiers=classifiers, x=x, y=y)
-    plot_compare_roc_curve(classifiers=classifiers, x=x, y=y)
-    plot_compare_learning_curve(classifiers=classifiers, x=x, y=y, cv=cv,
-                                train_sizes=np.linspace(0.1, 0.5, 4))
 
     x, y, x_test, test_ids = import_cleaned_titanic_data(directorypath="titanic/")
 

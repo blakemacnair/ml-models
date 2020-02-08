@@ -14,16 +14,6 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, get_scorer, make_scorer, accuracy_score, precision_score
 
 
-def clean_na_values(s: pd.DataFrame):
-    means = s.mean()
-    for c in s.columns:
-        if c in means.keys():
-            s[c].loc[s[c].isna()] = means[c]
-        else:
-            m = s[c].value_counts().index[0]
-            s[c].loc[s[c].isna()] = m
-
-
 if __name__ == "__main__":
     # x, y, _, _ = import_cleaned_titanic_data(directorypath="titanic/")
     x, y = load_credit_fraud_numpy(filepath="data/creditcard.csv")
