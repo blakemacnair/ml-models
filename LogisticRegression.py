@@ -12,6 +12,8 @@ from mushrooms.mushroom_dataset import import_mushrooms_numpy
 if __name__ == "__main__":
     x_m, y_m = import_mushrooms_numpy(filepath="mushrooms/mushrooms.csv")
     x_t, y_t, _, _ = import_cleaned_titanic_data(directorypath="titanic/")
+
+    # https://scikit-learn.org/stable/modules/preprocessing.html#standardization-or-mean-removal-and-variance-scaling
     x_t_scaled = preprocessing.scale(x_t)
 
     # models = {

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
-from DecisionTree_ID3 import ID3Node
+from DecisionTree import ID3Node
 
 
 def import_mushrooms() -> pd.DataFrame:
