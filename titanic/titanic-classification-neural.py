@@ -1,10 +1,10 @@
 import numpy as np
 import random
 
-from NeuralNet import skorch_murder_bot
+from neural_network.NeuralNet import skorch_murder_bot
 from titanic.titanic_dataset import import_cleaned_titanic_data
 
-from metrics import plot_compare_precision_recall_curve, plot_compare_roc_curve, plot_compare_learning_curve
+from metrics import plot_compare_precision_recall_curve, plot_compare_roc_curve
 
 if __name__ == "__main__":
     random.seed(0)

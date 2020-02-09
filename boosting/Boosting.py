@@ -17,7 +17,7 @@ if __name__ == "__main__":
         'Gradient': GradientBoostingClassifier()
     }
 
-    x, y = load_credit_fraud_numpy(filepath='data/creditcard.csv')
+    x, y = load_credit_fraud_numpy(filepath='../data/creditcard.csv')
 
     split_cv = StratifiedKFold(n_splits=7, shuffle=True, random_state=0)
     train_ind, test_ind = list(split_cv.split(x, y))[0]
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # plot_compare_precision_recall_curve(models, x, y)
     # plot_compare_learning_curve(models, x, y)
 
-    x, y = load_shopper_intention_numpy(filepath='data/online_shoppers_intention.csv')
+    x, y = load_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv')
 
     plot_compare_roc_curve(models, x, y)
     plot_compare_precision_recall_curve(models, x, y)

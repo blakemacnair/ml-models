@@ -16,7 +16,7 @@ from sklearn.metrics import classification_report, get_scorer, make_scorer, accu
 
 if __name__ == "__main__":
     # x, y, _, _ = import_cleaned_titanic_data(directorypath="titanic/")
-    x, y = load_credit_fraud_numpy(filepath="data/creditcard.csv")
+    x, y = load_credit_fraud_numpy(filepath="../data/creditcard.csv")
     # x = x[:, 1:19]
 
     split_cv = ShuffleSplit(n_splits=1, test_size=0.7)

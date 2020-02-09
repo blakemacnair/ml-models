@@ -31,7 +31,7 @@ if __name__ == "__main__":
     plot_compare_learning_curve(classifiers=classifiers, x=x, y=y, cv=cv,
                                 train_sizes=np.linspace(0.1, 1.0, 15))
 
-    x, y = load_shopper_intention_numpy(filepath='data/online_shoppers_intention.csv')
+    x, y = load_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv')
 
     plot_compare_precision_recall_curve(classifiers=classifiers, x=x, y=y)
     plot_compare_roc_curve(classifiers=classifiers, x=x, y=y)
