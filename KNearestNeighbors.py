@@ -1,7 +1,9 @@
 from sklearn.neighbors import KNeighborsClassifier
-from titanic.titanic_dataset import import_cleaned_titanic_data
 from sklearn.model_selection import ShuffleSplit
 import numpy as np
+
+from titanic.titanic_dataset import import_cleaned_titanic_data
+from online_shopper_intention.dataset import load_shopper_intention_numpy
 
 from metrics import plot_compare_precision_recall_curve, plot_compare_roc_curve, plot_compare_learning_curve
 
@@ -23,6 +25,13 @@ if __name__ == "__main__":
     }
 
     x, y, x_test, test_ids = import_cleaned_titanic_data(directorypath="titanic/")
+
+    plot_compare_precision_recall_curve(classifiers=classifiers, x=x, y=y)
+    plot_compare_roc_curve(classifiers=classifiers, x=x, y=y)
+    plot_compare_learning_curve(classifiers=classifiers, x=x, y=y, cv=cv,
+                                train_sizes=np.linspace(0.1, 1.0, 15))
+
+    x, y = load_shopper_intention_numpy(filepath='data/online_shoppers_intention.csv')
 
     plot_compare_precision_recall_curve(classifiers=classifiers, x=x, y=y)
     plot_compare_roc_curve(classifiers=classifiers, x=x, y=y)

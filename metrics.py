@@ -1,5 +1,5 @@
 from sklearn.metrics import plot_precision_recall_curve, plot_roc_curve, plot_confusion_matrix, precision_recall_curve
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import average_precision_score, auc
 from sklearn.metrics import get_scorer
 
 from sklearn.model_selection import learning_curve
@@ -8,12 +8,12 @@ from sklearn.base import clone
 import matplotlib.pyplot as plt
 from typing import Dict, List, Any
 from sklearn.base import ClassifierMixin
-from sklearn.model_selection import ShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 import numpy as np
-from scipy.interpolate import make_interp_spline
+from scipy.interpolate import make_interp_spline, interp1d
 
 
-def compare_models(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
+def compare_models(classifiers: Dict[str, ClassifierMixin], cv: StratifiedShuffleSplit,
                    x: np.ndarray, y: np.ndarray, validation_size=0.2):
     train_scores: Dict[str, List] = {}
     test_scores: Dict[str, List] = {}
@@ -22,7 +22,7 @@ def compare_models(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
         train_scores[name] = []
         test_scores[name] = []
 
-    validation_cv = ShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
+    validation_cv = StratifiedShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
     train_ind, validation_ind = validation_cv.split(x, y).__next__()
 
     x_validation, y_validation = x[validation_ind], y[validation_ind]
@@ -54,15 +54,18 @@ def compare_models(classifiers: Dict[str, ClassifierMixin], cv: ShuffleSplit,
 
 
 def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
-                                cv=ShuffleSplit(n_splits=5),
+                                cv=StratifiedShuffleSplit(n_splits=5),
                                 train_sizes=np.linspace(0.1, 1.0, 9),
-                                scoring='accuracy'):
+                                scoring='balanced_accuracy'):
+    """
+    scoring param can be ['balanced_accuracy', 'precision', 'auc_roc'] among others
+    """
     fig = plt.figure()
     ax = fig.add_subplot()
 
     ax.set_title('Learning curves')
     ax.set_xlabel('Sample size')
-    ax.set_ylabel('Accuracy')
+    ax.set_ylabel(scoring)
 
     for name, clf in classifiers.items():
         train_sizes, train_scores, test_scores = learning_curve(clf, x, y, cv=cv,
@@ -82,7 +85,7 @@ def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: n
 
 
 def plot_compare_roc_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray, validation_size=0.2):
-    validation_cv = ShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
+    validation_cv = StratifiedShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
     train_ind, validation_ind = validation_cv.split(x, y).__next__()
 
     x_validation, y_validation = x[validation_ind], y[validation_ind]
@@ -100,8 +103,50 @@ def plot_compare_roc_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.nda
     plt.show()
 
 
+def plot_roc_crossval(clf, x, y, cv=StratifiedShuffleSplit(n_splits=5, test_size=0.6)):
+    tprs = []
+    aucs = []
+    mean_fpr = np.linspace(0, 1, 100)
+
+    fig, ax = plt.subplots()
+
+    for i, (train, test) in enumerate(cv.split(x, y)):
+        clf.fit(x[train], y[train])
+        viz = plot_roc_curve(clf, x[test], y[test],
+                             name='ROC fold {}'.format(i),
+                             alpha=0.3, lw=1, ax=ax)
+        spl = interp1d(viz.fpr, viz.tpr, kind='next')
+        interp_tpr = spl(mean_fpr).T
+
+        interp_tpr[0] = 0.0
+        tprs.append(interp_tpr)
+        aucs.append(viz.roc_auc)
+
+    ax.plot([0, 1], [0, 1], linestyle='--', lw=2, color='r',
+            label='Chance', alpha=.8)
+
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    mean_auc = auc(mean_fpr, mean_tpr)
+    std_auc = np.std(aucs)
+    ax.plot(mean_fpr, mean_tpr, color='b',
+            label=r'Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (mean_auc, std_auc),
+            lw=2, alpha=.8)
+
+    std_tpr = np.std(tprs, axis=0)
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0)
+    ax.fill_between(mean_fpr, tprs_lower, tprs_upper, color='grey', alpha=.2,
+                    label=r'$\pm$ 1 std. dev.')
+
+    ax.set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05],
+           title="Receiver operating characteristic")
+    ax.legend(loc="lower right")
+    plt.show()
+
+
 def plot_compare_precision_recall_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray, validation_size=0.2):
-    validation_cv = ShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
+    validation_cv = StratifiedShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
     train_ind, validation_ind = validation_cv.split(x, y).__next__()
 
     x_validation, y_validation = x[validation_ind], y[validation_ind]
@@ -119,6 +164,7 @@ def plot_compare_precision_recall_curve(classifiers: Dict[str, Any], x: np.ndarr
     plt.show()
 
 
+# TODO: Decision-Tree-specific stuff below here
 def plot_cost_complexity_pruning_path(tree, x, y):
     path = tree.cost_complexity_pruning_path(x, y)
     ccp_alphas, impurities = path.ccp_alphas, path.impurities
