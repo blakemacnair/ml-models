@@ -8,7 +8,7 @@ from typing import Dict, List, Any
 from sklearn.base import ClassifierMixin
 from sklearn.model_selection import StratifiedShuffleSplit
 import numpy as np
-from scipy.interpolate import make_interp_spline
+from scipy.interpolate import interp1d
 
 
 def compare_models(classifiers: Dict[str, ClassifierMixin], cv: StratifiedShuffleSplit,
@@ -54,35 +54,41 @@ def compare_models(classifiers: Dict[str, ClassifierMixin], cv: StratifiedShuffl
 def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
                                 cv=StratifiedShuffleSplit(n_splits=5),
                                 train_sizes=np.linspace(0.1, 1.0, 9),
-                                scoring='balanced_accuracy'):
+                                scoring='balanced_accuracy',
+                                title_prefix=None):
     """
     scoring param can be ['balanced_accuracy', 'precision', 'auc_roc'] among others
     """
+    # TODO: Use Seaborn instead of vanilla pyplot
     fig = plt.figure()
     ax = fig.add_subplot()
 
-    ax.set_title('Learning curves')
+    title = 'Learning curves'
+    if title_prefix is not None:
+        title = title_prefix + ": " + title
+    ax.set_title(title)
     ax.set_xlabel('Sample size')
     ax.set_ylabel(scoring)
 
     for name, clf in classifiers.items():
-        train_sizes, train_scores, test_scores = learning_curve(clf, x, y, cv=cv,
-                                                                train_sizes=train_sizes,
-                                                                random_state=0,
-                                                                scoring=get_scorer(scoring))
+        train_sizes, train_scores, test_scores, fit_times, score_times = learning_curve(clf, x, y, cv=cv,
+                                                                                        train_sizes=train_sizes,
+                                                                                        random_state=0,
+                                                                                        scoring=get_scorer(scoring),
+                                                                                        return_times=True)
         test_scores_mean = np.mean(test_scores, axis=1)
 
-        spl = make_interp_spline(train_sizes, test_scores_mean, k=3)
-
-        x_new = np.linspace(train_sizes.min(), train_sizes.max(), 200)
-        y_new = spl(x_new).T
-        ax.plot(x_new, y_new, label=name)
+        spl = interp1d(train_sizes, test_scores_mean, kind='linear')
+        train_sizes_spaced = np.linspace(train_sizes.min(), train_sizes.max(), 200)
+        interp_scores = spl(train_sizes_spaced).T
+        ax.plot(train_sizes_spaced, interp_scores, label=name)
 
     ax.legend()
     plt.show()
 
 
-def plot_compare_roc_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray, validation_size=0.2):
+def plot_compare_roc_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray, validation_size=0.2,
+                           title_prefix=None):
     validation_cv = StratifiedShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
     train_ind, validation_ind = validation_cv.split(x, y).__next__()
 
@@ -91,7 +97,10 @@ def plot_compare_roc_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.nda
 
     fig = plt.figure()
     ax = fig.add_subplot()
-    ax.set_title('ROC curves')
+    title = 'ROC Curves'
+    if title_prefix is not None:
+        title = title_prefix + ": " + title
+    ax.set_title(title)
 
     for name, clf in classifiers.items():
         clf.fit(x, y)
@@ -101,7 +110,8 @@ def plot_compare_roc_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.nda
     plt.show()
 
 
-def plot_compare_precision_recall_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray, validation_size=0.2):
+def plot_compare_precision_recall_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
+                                        validation_size=0.2, title_prefix=None):
     validation_cv = StratifiedShuffleSplit(n_splits=1, test_size=validation_size, random_state=0)
     train_ind, validation_ind = validation_cv.split(x, y).__next__()
 
@@ -110,7 +120,10 @@ def plot_compare_precision_recall_curve(classifiers: Dict[str, Any], x: np.ndarr
 
     fig = plt.figure()
     ax = fig.add_subplot()
-    ax.set_title('Precision-Recall curves')
+    title = 'Precision-Recall curves'
+    if title_prefix is not None:
+        title = title_prefix + ": " + title
+    ax.set_title(title)
 
     for name, clf in classifiers.items():
         clf.fit(x, y)
