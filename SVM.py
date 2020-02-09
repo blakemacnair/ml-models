@@ -9,19 +9,15 @@ from metrics import plot_compare_learning_curve, plot_compare_roc_curve, plot_co
 if __name__ == "__main__":
     cv = ShuffleSplit(n_splits=5, test_size=0.6, random_state=0)
 
-    models_kernels = {
-        'linear' : SVC(kernel='linear'),
-        'rbf'    : SVC(kernel='rbf'),
-        'poly'   : SVC(kernel='poly'),
-        'sigmoid': SVC(kernel='sigmoid')
-    }
+    models_kernels = dict(linear=SVC(kernel='linear'),
+                          rbf=SVC(kernel='rbf'),
+                          poly=SVC(kernel='poly'),
+                          sigmoid=SVC(kernel='sigmoid'))
 
-    models_classes = {
-        'SVC'         : SVC(kernel='linear'),
-        'LinearSVC'   : LinearSVC(),
-        'NuSVC'       : NuSVC(kernel='linear'),
-        'NuSVC (poly)': NuSVC(kernel='poly')
-    }
+    models_classes = dict(svc=SVC(kernel='linear'),
+                          linearSVC=LinearSVC(),
+                          nuSVC=NuSVC(kernel='linear'),
+                          polyNuSVC=NuSVC(kernel='poly'))
 
     x, y, x_test, test_ids = import_cleaned_titanic_data(directorypath="titanic/")
     x_scaled = preprocessing.scale(x)
