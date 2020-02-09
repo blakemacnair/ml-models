@@ -38,9 +38,9 @@ def load_shopper_intention_data(filepath='../data/online_shoppers_intention.csv'
 
 
 # TODO: Fix up for shopper intention data
-# def load_normalized_shopper_intention_data(filepath='../data/online_shoppers_intention.csv'):
-#     data = load_shopper_intention_data(filepath)
-#     return normalize_shopper_intention_data(data)
+def load_normalized_shopper_intention_data(filepath='../data/online_shoppers_intention.csv'):
+    data = load_shopper_intention_data(filepath)
+    return normalize_shopper_intention_data(data)
 
 
 def load_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv'):
@@ -50,24 +50,22 @@ def load_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv
     return x, y
 
 
-# TODO: Fix up for shopper intention data
-# def load_normalized_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv'):
-#     data = load_normalized_shopper_intention_data(filepath)
-#     x = data.drop(columns='Revenue').to_numpy()
-#     y = data['Revenue'].to_numpy()
-#     return x, y
+def load_normalized_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv'):
+    data = load_normalized_shopper_intention_data(filepath)
+    x = data.drop(columns=['Revenue']).to_numpy()
+    y = data['Revenue'].to_numpy()
+    return x, y
 
 
-# TODO: Fix up for shopper intention data
-# def normalize_shopper_intention_data(data: pd.DataFrame):
-#     v_data = data.drop(columns=['Class', 'Amount', 'Time'])
-#     v = v_data.to_numpy()
-#     v_scaled = scale(v)
-#     v_data_scaled = pd.DataFrame(v_scaled, index=v_data.index, columns=v_data.columns)
-#
-#     data_scaled = data.copy()
-#     data_scaled.update(v_data_scaled)
-#     return data_scaled
+def normalize_shopper_intention_data(data: pd.DataFrame):
+    v_data = data[data.columns[:10]]
+    v = v_data.to_numpy()
+    v_scaled = scale(v)
+    v_data_scaled = pd.DataFrame(v_scaled, index=v_data.index, columns=v_data.columns)
+
+    data_scaled = data.copy()
+    data_scaled.update(v_data_scaled)
+    return data_scaled
 
 
 if __name__ == "__main__":

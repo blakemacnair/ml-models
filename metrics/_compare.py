@@ -1,14 +1,27 @@
-from sklearn.metrics import plot_precision_recall_curve, plot_roc_curve, plot_confusion_matrix, precision_recall_curve
-from sklearn.metrics import get_scorer
+from sklearn.metrics import plot_precision_recall_curve, plot_roc_curve, plot_confusion_matrix
+from sklearn.metrics import get_scorer, precision_recall_curve
 
 from sklearn.model_selection import learning_curve
 
 import matplotlib.pyplot as plt
 from typing import Dict, List, Any
 from sklearn.base import ClassifierMixin
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit, StratifiedKFold
 import numpy as np
 from scipy.interpolate import interp1d
+
+
+def compare_models_all_metrics(models,
+                               x,
+                               y,
+                               train_sizes,
+                               scoring='balanced_accuracy',
+                               cv=StratifiedShuffleSplit(n_splits=5, test_size=0.7),
+                               title_prefix=None):
+    plot_compare_roc_curve(models, x, y, title_prefix=title_prefix)
+    plot_compare_precision_recall_curve(models, x, y, title_prefix=title_prefix)
+    plot_compare_learning_curve(models, x, y, cv=cv, train_sizes=train_sizes, scoring=scoring,
+                                title_prefix=title_prefix)
 
 
 def compare_models(classifiers: Dict[str, ClassifierMixin], cv: StratifiedShuffleSplit,
@@ -131,3 +144,22 @@ def plot_compare_precision_recall_curve(classifiers: Dict[str, Any], x: np.ndarr
 
     ax.legend()
     plt.show()
+
+
+def cross_validated_pr_curve(clf, x: np.ndarray, y: np.ndarray,
+                             folds: int = 5, title_prefix=None):
+    kfold = StratifiedKFold(n_splits=folds)
+
+    all_p = []
+    all_r = []
+    all_thres = []
+
+    for train_ind, test_ind in kfold.split(x, y):
+        x_train, x_test = x[train_ind], x[test_ind]
+        y_train, y_test = y[train_ind], y[test_ind]
+        clf.fit(x, y)
+        predictions = clf.predict_proba(x_test)[:, 1]
+        precision, recall, thresholds = precision_recall_curve(y_test, predictions)
+        all_p.append(precision)
+        all_r.append(recall)
+        all_thres.append(thresholds)
