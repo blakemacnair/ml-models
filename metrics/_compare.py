@@ -16,11 +16,11 @@ def compare_models_all_metrics(models,
                                y,
                                train_sizes,
                                scoring='balanced_accuracy',
-                               cv=StratifiedShuffleSplit(n_splits=5, test_size=0.7),
+                               k_folds=5,
                                title_prefix=None):
     plot_compare_roc_curve(models, x, y, title_prefix=title_prefix)
     plot_compare_precision_recall_curve(models, x, y, title_prefix=title_prefix)
-    plot_compare_learning_curve(models, x, y, cv=cv, train_sizes=train_sizes, scoring=scoring,
+    plot_compare_learning_curve(models, x, y, k_folds=k_folds, train_sizes=train_sizes, scoring=scoring,
                                 title_prefix=title_prefix)
 
 
@@ -65,7 +65,7 @@ def compare_models(classifiers: Dict[str, ClassifierMixin], cv: StratifiedShuffl
 
 
 def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: np.ndarray,
-                                cv=StratifiedShuffleSplit(n_splits=5),
+                                k_folds=5,
                                 train_sizes=np.linspace(0.1, 1.0, 9),
                                 scoring='balanced_accuracy',
                                 title_prefix=None):
@@ -84,11 +84,13 @@ def plot_compare_learning_curve(classifiers: Dict[str, Any], x: np.ndarray, y: n
     ax.set_ylabel(scoring)
 
     for name, clf in classifiers.items():
-        train_sizes, train_scores, test_scores, fit_times, score_times = learning_curve(clf, x, y, cv=cv,
+        train_sizes, train_scores, test_scores, fit_times, score_times = learning_curve(clf, x, y,
+                                                                                        cv=k_folds,
                                                                                         train_sizes=train_sizes,
                                                                                         random_state=0,
                                                                                         scoring=get_scorer(scoring),
-                                                                                        return_times=True)
+                                                                                        return_times=True,
+                                                                                        n_jobs=-1)
         test_scores_mean = np.mean(test_scores, axis=1)
 
         spl = interp1d(train_sizes, test_scores_mean, kind='linear')

@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sb
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import scale, OneHotEncoder
+from sklearn.decomposition import PCA
 
 
 def load_shopper_intention_data(filepath='../data/online_shoppers_intention.csv'):
@@ -54,6 +55,7 @@ def load_normalized_shopper_intention_numpy(filepath='../data/online_shoppers_in
     data = load_normalized_shopper_intention_data(filepath)
     x = data.drop(columns=['Revenue']).to_numpy()
     y = data['Revenue'].to_numpy()
+    x = PCA(n_components=30).fit_transform(x)
     return x, y
 
 

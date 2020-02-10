@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sb
 from sklearn import preprocessing
+from sklearn.decomposition import PCA
 
 
 def load_credit_fraud_data(filepath='../data/creditcard.csv'):
@@ -18,6 +19,7 @@ def load_credit_fraud_numpy(filepath='../data/creditcard.csv'):
     xy = data.to_numpy()
     x = xy[:, :-1]
     y = xy[:, -1]
+    x = PCA(n_components=5).fit_transform(x)
     return x, y
 
 
@@ -26,6 +28,7 @@ def load_normalized_credit_fraud_numpy(filepath='../data/creditcard.csv'):
     xy = data.to_numpy()
     x = xy[:, :-1]
     y = xy[:, -1]
+    x = PCA(n_components=5).fit_transform(x)
     return x, y
 
 

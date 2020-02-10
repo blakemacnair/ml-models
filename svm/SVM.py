@@ -1,37 +1,50 @@
 import numpy as np
-from sklearn.svm import SVC, LinearSVC, NuSVC
-from titanic.titanic_dataset import import_cleaned_titanic_data
-from sklearn.model_selection import ShuffleSplit
-from sklearn import preprocessing
+from sklearn.svm import SVC, LinearSVC
+from sklearn.linear_model import SGDClassifier
 
-from metrics import plot_compare_learning_curve, plot_compare_roc_curve, plot_compare_precision_recall_curve
+from credit_card_fraud.dataset import load_normalized_credit_fraud_numpy, load_credit_fraud_numpy
+from online_shopper_intention.dataset import load_normalized_shopper_intention_numpy
+from sklearn.model_selection import train_test_split
+
+from metrics import compare_models_all_metrics
 
 if __name__ == "__main__":
-    cv = ShuffleSplit(n_splits=5, test_size=0.6, random_state=0)
+    # Load the data
+    x_cr, y_cr = load_normalized_credit_fraud_numpy(filepath='../data/creditcard.csv')
+    x_sh, y_sh = load_normalized_shopper_intention_numpy(filepath='../data/online_shoppers_intention.csv')
+    train_sizes = np.linspace(0.3, 1, 8)
 
+    # Generate some models to compare their learning efficacy
     models_kernels = dict(linear=SVC(kernel='linear'),
                           rbf=SVC(kernel='rbf'),
                           poly=SVC(kernel='poly'),
                           sigmoid=SVC(kernel='sigmoid'))
 
-    models_classes = dict(svc=SVC(kernel='linear'),
+    # compare_models_all_metrics(models_kernels, x_sh, y_sh, train_sizes=train_sizes)
+
+    models_classes = dict(rbf=SVC(kernel='rbf'),
                           linearSVC=LinearSVC(),
-                          nuSVC=NuSVC(kernel='linear'),
-                          polyNuSVC=NuSVC(kernel='poly'))
+                          stochastic=SGDClassifier())
 
-    x, y, x_test, test_ids = import_cleaned_titanic_data(directorypath="titanic/")
-    x_scaled = preprocessing.scale(x)
+    # compare_models_all_metrics(models_classes, x_sh, y_sh, train_sizes=train_sizes)
 
-    plot_compare_precision_recall_curve(models_kernels, x_scaled, y)
-    plot_compare_roc_curve(models_kernels, x_scaled, y)
-    plot_compare_learning_curve(models_kernels, x_scaled, y,
-                                cv=ShuffleSplit(test_size=0.3),
-                                train_sizes=np.linspace(0.2, 1.0, 5))
+    models_weights = dict(svc_1_5=SVC(kernel='linear', class_weight={0: 1, 1: 5}),
+                          svc_1_100=SVC(kernel='linear', class_weight={0: 1, 1: 100}),
+                          rbf_1_5=SVC(kernel='rbf', class_weight={0: 1, 1: 10}),
+                          rbf_1_100=SVC(kernel='rbf', class_weight={0: 1, 1: 20}))
 
-    plot_compare_precision_recall_curve(models_classes, x_scaled, y)
-    plot_compare_roc_curve(models_classes, x_scaled, y)
-    plot_compare_learning_curve(models_classes, x_scaled, y,
-                                cv=ShuffleSplit(test_size=0.3),
-                                train_sizes=np.linspace(0.2, 1.0, 5))
+    # compare_models_all_metrics(models_weights, x_sh, y_sh, train_sizes=train_sizes)
 
+    # Mess around with gamma in SVC with rbf kernel
+    models_gamma = dict(gamma_scale=SVC(),
+                        gamma_auto=SVC(gamma='auto'),
+                        gamma5em6=SVC(gamma=5e-6),
+                        gamma5em4=SVC(gamma=5e-4))
+
+    # compare_models_all_metrics(models_gamma, x_sh, y_sh, train_sizes=train_sizes)
+
+    # best model: {class='SVC', gamma='scale', kernel='rbf'} - all defaults ;)
+    best_model = LinearSVC(class_weight='balanced')
+
+    compare_models_all_metrics(models_classes, x_cr, y_cr, train_sizes, k_folds=5)
     print("Booty")
