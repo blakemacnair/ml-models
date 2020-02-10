@@ -17,11 +17,13 @@ def compare_models_all_metrics(models,
                                train_sizes,
                                scoring='balanced_accuracy',
                                k_folds=5,
-                               title_prefix=None):
+                               title_prefix=None,
+                               plot_learning_curve=True):
     plot_compare_roc_curve(models, x, y, title_prefix=title_prefix)
     plot_compare_precision_recall_curve(models, x, y, title_prefix=title_prefix)
-    plot_compare_learning_curve(models, x, y, k_folds=k_folds, train_sizes=train_sizes, scoring=scoring,
-                                title_prefix=title_prefix)
+    if plot_learning_curve:
+        plot_compare_learning_curve(models, x, y, k_folds=k_folds, train_sizes=train_sizes, scoring=scoring,
+                                    title_prefix=title_prefix)
 
 
 def compare_models(classifiers: Dict[str, ClassifierMixin], cv: StratifiedShuffleSplit,

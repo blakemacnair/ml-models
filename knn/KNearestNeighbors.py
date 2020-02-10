@@ -10,7 +10,6 @@ from metrics import compare_models_all_metrics
 if __name__ == "__main__":
     # Load the data
     x_cr, y_cr = load_credit_fraud_numpy(filepath='./data/creditcard.csv')
-    x_cr_norm, y_cr_norm = load_normalized_credit_fraud_numpy(filepath='./data/creditcard.csv')
     x_sh, y_sh = load_normalized_shopper_intention_numpy(filepath='./data/online_shoppers_intention.csv')
 
     # Start by running randomized search to give us a good ballpark for an optimal configuration for the classifier
@@ -42,7 +41,7 @@ Parameters: {'p': 7, 'n_neighbors': 35, 'leaf_size': 70, 'algorithm': 'kd_tree'}
     """
 
     # Init the best model to base rest of tests on
-    base = KNeighborsClassifier(p=8, n_neighbors=35, leaf_size=70, algorithm='kd_tree', weights='distance', n_jobs=-1)
+    base = KNeighborsClassifier(p=8, n_neighbors=50, leaf_size=70, algorithm='kd_tree', weights='distance', n_jobs=-1)
 
     train_sizes = np.linspace(0.1, 1, 10)
 
@@ -53,23 +52,26 @@ Parameters: {'p': 7, 'n_neighbors': 35, 'leaf_size': 70, 'algorithm': 'kd_tree'}
         clf.n_neighbors = n_neighbors
         clfs_neighbors['{}-nn'.format(n_neighbors)] = clf
 
-    compare_models_all_metrics(clfs_neighbors, x_sh, y_sh, train_sizes=train_sizes, title_prefix="Shopper Intention")
+    compare_models_all_metrics(clfs_neighbors, x_cr, y_cr, train_sizes=train_sizes, title_prefix="Credit Fraud",
+                               plot_learning_curve=False)
 
     # Compare different leaf sizes
     clfs_leaf_size = dict()
-    for leaf_size in range(30, 81, 5):
+    for leaf_size in range(5, 71, 10):
         clf = copy.deepcopy(base)
         clf.leaf_size = leaf_size
-        clfs_neighbors['{}-neighbor'.format(leaf_size)] = clf
+        clfs_leaf_size['{}-leaf_size'.format(leaf_size)] = clf
 
-    compare_models_all_metrics(clfs_leaf_size, x_sh, y_sh, train_sizes=train_sizes, title_prefix="Shopper Intention")
+    compare_models_all_metrics(clfs_leaf_size, x_cr, y_cr, train_sizes=train_sizes, title_prefix="Credit Fraud",
+                               plot_learning_curve=False)
 
     # Compare different p values
     clfs_p = dict()
-    for p in range(30, 81, 5):
+    for p in range(2, 35, 5):
         clf = copy.deepcopy(base)
         clf.p = p
-        clfs_neighbors['{}-neighbor'.format(p)] = clf
+        clfs_p['{}-p'.format(p)] = clf
 
-    compare_models_all_metrics(clfs_p, x_sh, y_sh, train_sizes=train_sizes, title_prefix="Shopper Intention")
+    compare_models_all_metrics(clfs_p, x_cr, y_cr, train_sizes=train_sizes, title_prefix="Credit Fraud",
+                               plot_learning_curve=False)
     print("Booty - Done")
